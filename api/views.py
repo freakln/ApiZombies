@@ -45,3 +45,7 @@ class ReportRecordViewSet(viewsets.ModelViewSet):
     queryset = ReportInfect.objects.all()
     serializer_class = ReportSerializer
 
+
+class TradeRecordViewSet(viewsets.ModelViewSet):
+    queryset = Trade.objects.all()
+    serializer_class = TradeSerializer
