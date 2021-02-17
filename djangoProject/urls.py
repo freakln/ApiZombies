@@ -8,9 +8,11 @@ router.register(r'location', views.LocationRecordViewSet)
 router.register(r'report', views.ReportRecordViewSet)
 router.register(r'trade', views.TradeRecordViewSet)
 
+
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
+    path('reports', views.ApiReport.as_view()),
     path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]

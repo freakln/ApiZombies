@@ -1,33 +1,14 @@
-from django.contrib.auth.models import User, Group
+from django.db.models import Avg, Count, Sum
 from rest_framework import viewsets
-from rest_framework import permissions
 from rest_framework.response import Response
-from api.models import *
+from rest_framework.views import APIView
 from api.serializers import *
-
-
-class UserViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows users to be viewed or edited.
-    """
-    queryset = User.objects.all().order_by('-date_joined')
-    serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-
-class GroupViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows groups to be viewed or edited.
-    """
-    queryset = Group.objects.all()
-    serializer_class = GroupSerializer
-    permission_classes = [permissions.IsAuthenticated]
 
 
 class SurvivorRecordViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
-        queryset = Survivor.objects.all()
+        queryset = Survivor.objects.filter(isInfected=False)
         serializer = SurvivorListSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -47,5 +28,41 @@ class ReportRecordViewSet(viewsets.ModelViewSet):
 
 
 class TradeRecordViewSet(viewsets.ModelViewSet):
+    """
+     Trade endpoint
+     Survivor:ID
+     trade items : {water:amount,food:amount}
+     """
     queryset = Trade.objects.all()
     serializer_class = TradeSerializer
+
+
+class ApiReport(APIView):
+    """
+
+    Percentage of infected survivors.
+    Percentage of non-infected survivors.
+    Average amount of each kind of resource by survivor (e.g. 5 waters per survivor)
+    Points lost because of infected survivor.
+
+    """
+
+    def get(self, request, format=None):
+        percent_infect = (Survivor.objects.filter(isInfected=True).count() / Survivor.objects.count()) * 100
+        percent_non_infect = (Survivor.objects.filter(isInfected=False).count() / Survivor.objects.count()) * 100
+        avg = Inventory.objects.all().aggregate(Avg('water'), Avg('food'), Avg('medication'), Avg('ammunition'))
+        points = Inventory.objects.filter(survivor__isInfected=True).aggregate(total=(Sum('water') * 4 +
+                                                                                      Sum('food') * 3 +
+                                                                                      Sum('medication') * 2 +
+                                                                                      Sum('ammunition') * 1))
+        resp = []
+        for item in avg:
+            resp.append('{:.2f} {}s per survivor'.format(avg[item], item[:-5]))
+
+
+        response = ('Now we have {:.2f}% survivor infected'.format(percent_infect),
+                    'Now we have {:.2f}% survivor alive and safe'.format(percent_non_infect),
+                    'Average amount inventory from survivors',
+                    resp,
+                    'number of trade points lost in lost inventories of infected survivors: {}'.format(points['total']))
+        return Response(response)

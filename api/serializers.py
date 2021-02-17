@@ -1,4 +1,6 @@
 from django.contrib.auth.models import User, Group
+
+
 from .models import Survivor, Inventory, Location, ReportInfect, Trade
 from rest_framework import serializers
 from collections import OrderedDict
@@ -148,4 +150,6 @@ class SurvivorSerializer(serializers.ModelSerializer):
         survivor = Survivor.objects.create(**survivor_data)
         Inventory.objects.create(survivor=survivor, **inventors_data)
         Location.objects.create(survivor=survivor, **locations_data)
-        return survivor
+        return survivor,
+
+

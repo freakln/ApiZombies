@@ -68,3 +68,4 @@ def update_report(sender, instance, **kwargs):
     if instance.survivor.reports.all().count() > 2:
         instance.survivor.isInfected = True
         instance.survivor.save()
+
