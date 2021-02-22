@@ -32,7 +32,7 @@ class InventorySerializer(serializers.ModelSerializer):
 class LocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Location
-        fields = ('id', 'latitude', 'longitude')
+        fields = ('latitude', 'longitude')
 
 
 class SurvivorBaseSerializer(serializers.ModelSerializer):
@@ -68,11 +68,18 @@ class TradeSerializer(serializers.ModelSerializer):
         model = Trade
         fields = ('survivor_one', 'survivor_one_items', 'survivor_two', 'survivor_two_items')
 
-    def create(self, validated_data, ):
+    def create(self, validated_data):
         survivor_one = validated_data['survivor_one']
         trade_one = validated_data['survivor_one_items']
         survivor_two = validated_data['survivor_two']
         trade_two = validated_data['survivor_two_items']
+
+        if survivor_one.isInfected:
+            raise serializers.ValidationError({"Error": "{} has infected status and lost access to exchange"
+                                              .format(survivor_one.name)})
+        if survivor_two.isInfected:
+            raise serializers.ValidationError({"Error": "{} has infected status and lost access to exchange"
+                                              .format(survivor_two.name)})
         if validated_data['survivor_one'] == validated_data['survivor_two']:
             raise serializers.ValidationError({"Error": "the exchange can only be made between different survivors"})
         else:
@@ -127,7 +134,7 @@ class SurvivorListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Survivor
-        fields = ('name', 'gender', 'age', 'isInfected', 'inventory', 'location')
+        fields = ('name', 'gender', 'age', 'inventory', 'location')
 
 
 class SurvivorSerializer(serializers.ModelSerializer):
@@ -150,6 +157,4 @@ class SurvivorSerializer(serializers.ModelSerializer):
         survivor = Survivor.objects.create(**survivor_data)
         Inventory.objects.create(survivor=survivor, **inventors_data)
         Location.objects.create(survivor=survivor, **locations_data)
-        return survivor,
-
-
+        return survivor

@@ -6,6 +6,25 @@ from api.serializers import *
 
 
 class SurvivorRecordViewSet(viewsets.ModelViewSet):
+    """Survivor Endpoint
+    {
+   "name":"text",
+   "gender":"M" or "F",
+   "age":15,
+   "inventory":{
+      "water":integer,
+      "food": integer,
+      "medication":integer,
+      "ammunition":integer
+   },
+   "location":{
+      "latitude": float,
+      "longitude":float
+   }
+}
+
+
+    """
 
     def list(self, request, *args, **kwargs):
         queryset = Survivor.objects.filter(isInfected=False)
@@ -17,12 +36,23 @@ class SurvivorRecordViewSet(viewsets.ModelViewSet):
 
 
 class LocationRecordViewSet(viewsets.ModelViewSet):
+    """
+      Location endpoint
+      survivor: ID
+      latitude: integer
+      longitude: integer
+      """
     queryset = Location.objects.all()
     serializer_class = LocationSerializer
     http_method_names = ['get', 'put', 'head']
 
 
 class ReportRecordViewSet(viewsets.ModelViewSet):
+    """
+     Report endpoint
+     survivor: ID
+     motive: "text"
+     """
     queryset = ReportInfect.objects.all()
     serializer_class = ReportSerializer
 
@@ -30,8 +60,10 @@ class ReportRecordViewSet(viewsets.ModelViewSet):
 class TradeRecordViewSet(viewsets.ModelViewSet):
     """
      Trade endpoint
-     Survivor:ID
-     trade items : {water:amount,food:amount}
+     survivor_one:2
+    survivor_one_items:{"water":1}
+    survivor_two:3
+    survivor_two_items:{"water":1}}
      """
     queryset = Trade.objects.all()
     serializer_class = TradeSerializer

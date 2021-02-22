@@ -13,7 +13,7 @@ values = {'water': 4,
 class Survivor(models.Model):
     class Gender(models.TextChoices):
         MAN = 'M', _('Man')
-        WOMAN = 'W', _('Woman')
+        WOMAN = 'F', _('Female')
 
     name = models.CharField(max_length=100, null=False, blank=False)
     age = models.IntegerField()
